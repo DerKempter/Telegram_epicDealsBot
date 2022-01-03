@@ -22,3 +22,8 @@ def unknown(update: Update, context: CallbackContext):
 start_handler = CommandHandler('start', start)
 test_handler = CommandHandler('test', test)
 unknown_handler = MessageHandler(Filters.command, unknown)
+
+
+def get_handlers():
+    res_list = [start_handler, test_handler, unknown_handler]
+    return res_list
