@@ -3,15 +3,29 @@ import logging
 from telegram.ext import CallbackContext, CommandHandler, MessageHandler, Filters
 from telegram import Update
 
+main_bot = None
+
+
+def get_bot(bot):
+    global main_bot
+    main_bot = bot
+
 
 def start(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, I respond to /free and show the current"
+                                                                    " free epic games!")
     logging.log(level=logging.INFO, msg='executed "start" command')
 
 
-def test(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Das ist ein test :D")
-    logging.log(level=logging.INFO, msg='executed "test" command')
+def get_free_games(update: Update, context: CallbackContext):
+    global main_bot
+    free_games = main_bot.get_free_games()
+    for game in free_games:
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=game[1], caption=f"{game[0]},\n"
+                                                                                        f"Original Prize: {game[2]},\n"
+                                                                                        f"On sale since {game[3]},\n"
+                                                                                        f"On sale until {game[4]}")
+    logging.log(level=logging.INFO, msg='executed "free" command')
 
 
 def unknown(update: Update, context: CallbackContext):
@@ -20,10 +34,10 @@ def unknown(update: Update, context: CallbackContext):
 
 
 start_handler = CommandHandler('start', start)
-test_handler = CommandHandler('test', test)
+free_game_handler = CommandHandler('free', get_free_games)
 unknown_handler = MessageHandler(Filters.command, unknown)
 
 
 def get_handlers():
-    res_list = [start_handler, test_handler, unknown_handler]
+    res_list = [start_handler, free_game_handler, unknown_handler]
     return res_list

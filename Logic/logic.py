@@ -49,15 +49,18 @@ class BotLogic:
         else:
             return self.prep_dispatcher()
 
+    # noinspection PyMethodMayBeStatic
     def get_free_games(self) -> []:
         api = EpicGamesStoreAPI()
         free_games = api.get_free_games()['data']['Catalog']['searchStore']['elements']
         free_games_parsed = []
         for game in free_games:
+            if game['promotions'] is None or game['price']['totalPrice']['fmtPrice']['discountPrice'] != '0':
+                continue
             game_name = game['title']
             game_thumb = None
 
-            for image in game['KeyImages']:
+            for image in game['keyImages']:
                 if image['type'] == 'Thumbnail':
                     game_thumb = image['url']
             game_price = game['price']['totalPrice']['fmtPrice']['originalPrice']
@@ -77,8 +80,12 @@ class BotLogic:
                     end_date = datetime.fromisoformat(end_date_iso)
                     # Will be free from start_date to end_date
                 else:
-                    start_date = None
-                    end_date = None
+                    promotion_data = game_promotions[0]['promotionalOffers'][0]
+                    start_date_iso, end_date_iso = (
+                        promotion_data['startDate'][:-1], promotion_data['endDate'][:-1]
+                    )
+                    start_date = datetime.fromisoformat(start_date_iso)
+                    end_date = datetime.fromisoformat(end_date_iso)
                     # Is free now
             except TypeError:
                 pass
