@@ -64,6 +64,10 @@ class BotLogic:
                 if image['type'] == 'Thumbnail':
                     game_thumb = image['url']
             game_price = game['price']['totalPrice']['fmtPrice']['originalPrice']
+            page_slug = game['urlSlug']
+            page_url_base = f"https://www.epicgames.com/store/p/"
+            page_url_launcher_base = "http://epicfreegames.net/redirect?slug="
+
             start_date = None
             end_date = None
             try:
@@ -89,6 +93,7 @@ class BotLogic:
                     # Is free now
             except TypeError:
                 pass
-            current_free_game = [game_name, game_thumb, game_price, start_date, end_date]
+            current_free_game = [game_name, game_thumb, game_price, page_slug, page_url_base, page_url_launcher_base,
+                                 start_date, end_date]
             free_games_parsed.append(current_free_game)
         return free_games_parsed

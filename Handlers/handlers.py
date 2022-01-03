@@ -21,10 +21,13 @@ def get_free_games(update: Update, context: CallbackContext):
     global main_bot
     free_games = main_bot.get_free_games()
     for game in free_games:
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=game[1], caption=f"{game[0]},\n"
-                                                                                        f"Original Prize: {game[2]},\n"
-                                                                                        f"On sale since {game[3]},\n"
-                                                                                        f"On sale until {game[4]}")
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=game[1],
+                               caption=f"{game[0]}\n"
+                                       f"Original Prize: {game[2]}\n"
+                                       f"On sale since {game[6]}\n"
+                                       f"On sale until {game[7]}\n"
+                                       f"<a href={game[4] + game[3]}>Store Link</a> \n"
+                                       f"<a href={game[5] + game[3]}>Store Link</a> \n")
     logging.log(level=logging.INFO, msg='executed "free" command')
 
 
