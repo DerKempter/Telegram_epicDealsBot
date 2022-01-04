@@ -27,18 +27,16 @@ class BotLogic:
         setup_logging()
         prep_token()
         self.prep_dispatcher()
-        # self.prep_job_queue()
+        self.prep_job_queue()
 
     def startup(self):
         self.updater.start_polling()
         self.updater.idle()
 
     def prep_job_queue(self):
-        self.job_queue = JobQueue
-        self.job_queue.run_daily(self=JobQueue(), callback=handlers.check_for_free_games,
-                                 time=datetime.time(datetime(hour=20, minute=37, second=0, year=1, month=1, day=1)),
-                                 days=(0, 1, 2, 3, 4, 5, 6))
+        self.job_queue = self.updater.job_queue
         self.job_queue.set_dispatcher(dispatcher=self.dispatcher)
+        self.job_queue.run_once(callback=handlers.check_for_free_games, when=5)
 
     def prep_dispatcher(self):
         token_string = prep_token()

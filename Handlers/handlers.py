@@ -37,8 +37,14 @@ def get_free_games(update: Update, context: CallbackContext):
 
 
 def check_for_free_games(context: CallbackContext) -> None:
-    context.bot.send_message(chat_id='update.effective_chat.id', text="testtesttest")
-    logging.log(level=logging.INFO, msg='executed "check_free_games" command')
+    with open("ids.txt", "r") as file:
+        ids = file.readlines()
+        ids = list(dict.fromkeys(ids))
+        if "\n" in ids:
+            ids.remove("\n")
+    for client in ids:
+        context.bot.send_message(chat_id=client, text="testtesttest")
+        logging.log(level=logging.INFO, msg='executed "check_free_games" command')
 
 
 def register_for_free_games(update: Update, context: CallbackContext):
