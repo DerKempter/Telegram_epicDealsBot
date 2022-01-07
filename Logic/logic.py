@@ -1,9 +1,9 @@
 import logging
-from datetime import datetime
+from datetime import datetime, time
 
 import Handlers.handlers as handlers
 from epicstore_api import EpicGamesStoreAPI
-from telegram.ext import Updater, JobQueue
+from telegram.ext import Updater, JobQueue, CallbackContext
 
 
 def setup_logging():
@@ -36,7 +36,7 @@ class BotLogic:
     def prep_job_queue(self):
         self.job_queue = self.updater.job_queue
         self.job_queue.set_dispatcher(dispatcher=self.dispatcher)
-        self.job_queue.run_once(callback=handlers.check_for_free_games, when=5)
+        self.job_queue.run_daily(callback=handlers.check_for_free_games, time=time(2, 28))
 
     def prep_dispatcher(self):
         token_string = prep_token()

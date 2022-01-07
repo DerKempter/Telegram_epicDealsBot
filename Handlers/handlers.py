@@ -22,29 +22,88 @@ def start(update: Update, context: CallbackContext):
     logging.log(level=logging.INFO, msg='executed "start" command')
 
 
-def get_free_games(update: Update, context: CallbackContext):
-    global main_bot
-    free_games = main_bot.get_free_games()
-    for game in free_games:
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=game[1],
+def send_games(games_array, context: CallbackContext, target_id: str):
+    for game in games_array:
+        context.bot.send_photo(chat_id=target_id, photo=game[1],
                                caption=f"{game[0]}\n"
                                        f"Original Prize: {game[2]}\n"
                                        f"On sale since {game[6]}\n"
                                        f"On sale until {game[7]}\n"
                                        f"<a href={game[4] + game[3]}>Store Link</a> \n"
                                        f"<a href={game[5] + game[3]}>Store Link</a> \n")
+
+
+def get_free_games(update: Update, context: CallbackContext):
+    global main_bot
+    free_games = main_bot.get_free_games()
+    target_id = update.effective_chat.id
+    send_games(free_games, context, target_id)
     logging.log(level=logging.INFO, msg='executed "free" command')
 
 
-def check_for_free_games(context: CallbackContext) -> None:
+def check_for_free_games(bot, job) -> None:
+    context = CallbackContext()
     with open("ids.txt", "r") as file:
         ids = file.readlines()
         ids = list(dict.fromkeys(ids))
         if "\n" in ids:
             ids.remove("\n")
-    for client in ids:
-        context.bot.send_message(chat_id=client, text="testtesttest")
-        logging.log(level=logging.INFO, msg='executed "check_free_games" command')
+    check_for_validity()
+    with open("free_games.txt", "r+") as games_file:
+        games = games_file.readlines()
+        games = list(dict.fromkeys(games))
+    for game in games:
+        this_game = game.replace('\n', '').split('#')
+        start_time: datetime.datetime = datetime.datetime.strptime(this_game[6], '%Y-%m-%d %H:%M:%S')
+        end_time: datetime.datetime = datetime.datetime.strptime(this_game[7], '%Y-%m-%d %H:%M:%S')
+        this_game[6] = start_time
+        this_game[7] = end_time
+        games.remove(game)
+        games.append(this_game)
+    global main_bot
+    current_free_games = main_bot.get_free_games()
+    for free_game in current_free_games:
+        if free_game in games:
+            current_free_games.remove(free_game)
+    if len(current_free_games) > 0:
+        save_free_games(current_free_games)
+        for target_id in ids:
+            send_games(current_free_games, context, target_id.replace('\n', ''))
+            logging.log(level=logging.INFO, msg='executed "check_free_games" command')
+    else:
+        logging.log(level=logging.INFO, msg='no new games found')
+    logging.log(level=logging.INFO, msg='executed "check_for_free_games" command')
+
+
+def save_free_games(free_games):
+    game_strings = []
+    for game in free_games:
+        start_time_str = game[6].strftime('%Y-%m-%d %H:%M:%S')
+        end_time_str = game[7].strftime('%Y-%m-%d %H:%M:%S')
+        game[6] = start_time_str
+        game[7] = end_time_str
+        game_string = '#'.join(game)
+        game_strings.append(game_string)
+    with open("free_games.txt", "a+") as saved_games:
+        for string in game_strings:
+            saved_games.write(string+"\n")
+            logging.log(level=logging.INFO, msg='wrote a game to file')
+
+
+def check_for_validity():
+    with open("free_games.txt", "r+") as saved_games:
+        games = saved_games.readlines()
+    for game in games:
+        game_array = game.replace('\n', '').split('#')
+        end_time: datetime.datetime = datetime.datetime.strptime(game_array[7], '%Y-%m-%d %H:%M:%S')
+        if end_time < datetime.datetime.now():
+            games.remove(game)
+            logging.log(level=logging.INFO, msg='removed a game from file_array')
+    open("free_games.txt", "w").close()
+    with open("free_games.txt", "r+") as saved_games:
+        for game in games:
+            saved_games.write(game)
+            logging.log(level=logging.INFO, msg='wrote a game to file')
 
 
 def register_for_free_games(update: Update, context: CallbackContext):
@@ -100,8 +159,9 @@ free_game_handler = CommandHandler('free', get_free_games)
 subscribe_handler = CommandHandler('subscribe', register_for_free_games)
 unsubscribe_handler = CommandHandler('unsub', unsubscribe_from_free_games)
 unknown_handler = MessageHandler(Filters.command, unknown)
+test_handler = CommandHandler('test', check_for_free_games)
 
 
 def get_handlers():
-    res_list = [start_handler, free_game_handler, subscribe_handler, unsubscribe_handler, unknown_handler]
+    res_list = [start_handler, free_game_handler, subscribe_handler, unsubscribe_handler, test_handler, unknown_handler]
     return res_list
