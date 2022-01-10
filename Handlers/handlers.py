@@ -1,6 +1,8 @@
 import datetime
 import logging
 
+import requests
+
 from telegram.ext import CallbackContext, CommandHandler, MessageHandler, Filters
 from telegram import Update
 
@@ -23,6 +25,7 @@ def start(update: Update, context: CallbackContext):
 
 
 def keep_up(bot):
+    r = requests.request("https://api.telegram.org/bot5098403386:AAEp18hrFADbej9CkfK1Rs1e64cuummqglA/getMe")
     logging.log(level=logging.INFO, msg='Performing logging to keep the application awake')
 
 
