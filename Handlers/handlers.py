@@ -25,7 +25,8 @@ def start(update: Update, context: CallbackContext):
 
 
 def keep_up(bot):
-    r = requests.request(url="https://api.telegram.org/bot5098403386:AAEp18hrFADbej9CkfK1Rs1e64cuummqglA/getMe")
+    r = requests.request(method="GET",
+                         url="https://api.telegram.org/bot5098403386:AAEp18hrFADbej9CkfK1Rs1e64cuummqglA/getMe")
     logging.log(level=logging.INFO, msg='Performing logging to keep the application awake')
 
 
