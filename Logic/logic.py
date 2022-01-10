@@ -6,7 +6,7 @@ import pytz
 
 import Handlers.handlers as handlers
 from epicstore_api import EpicGamesStoreAPI
-from telegram.ext import Updater, JobQueue, CallbackContext
+from telegram.ext import Updater
 
 
 def setup_logging():
