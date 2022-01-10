@@ -1,5 +1,7 @@
 import logging
 import datetime
+import os
+
 import pytz
 
 import Handlers.handlers as handlers
@@ -20,18 +22,23 @@ def prep_token() -> str:
 class BotLogic:
     updater = None
     dispatcher = None
-    token_string = None
+    token_string = prep_token()
     handler_list = None
     job_queue = None
+    Port = int(os.environ.get('PORT', 5000))
 
     def __init__(self):
         setup_logging()
-        prep_token()
         self.prep_dispatcher()
         self.prep_job_queue()
 
     def startup(self):
-        self.updater.start_polling()
+        # self.updater.start_polling()
+        self.updater.start_webhook(listen="0.0.0.0",
+                                   port=self.Port,
+                                   url_path=self.token_string,
+                                   webhook_url="https://epic-telegram-bot.herokuapp.com/" + self.token_string)
+
         self.updater.idle()
 
     def prep_job_queue(self):
