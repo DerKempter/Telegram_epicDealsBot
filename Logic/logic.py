@@ -1,5 +1,6 @@
 import logging
-from datetime import datetime, time
+import datetime
+import pytz
 
 import Handlers.handlers as handlers
 from epicstore_api import EpicGamesStoreAPI
@@ -36,7 +37,10 @@ class BotLogic:
     def prep_job_queue(self):
         self.job_queue = self.updater.job_queue
         self.job_queue.set_dispatcher(dispatcher=self.dispatcher)
-        self.job_queue.run_daily(callback=handlers.check_for_free_games, time=time(2, 28))
+
+        timezone = pytz.timezone('CET')
+        self.job_queue.run_daily(callback=handlers.check_for_free_games,
+                                 time=datetime.time(hour=19, tzinfo=timezone))
 
     def prep_dispatcher(self):
         token_string = prep_token()
@@ -87,16 +91,16 @@ class BotLogic:
                         promotion_data['startDate'][:-1], promotion_data['endDate'][:-1]
                     )
                     # Remove the last "Z" character so Python's datetime can parse it.
-                    start_date = datetime.fromisoformat(start_date_iso)
-                    end_date = datetime.fromisoformat(end_date_iso)
+                    start_date = datetime.datetime.fromisoformat(start_date_iso)
+                    end_date = datetime.datetime.fromisoformat(end_date_iso)
                     # Will be free from start_date to end_date
                 else:
                     promotion_data = game_promotions[0]['promotionalOffers'][0]
                     start_date_iso, end_date_iso = (
                         promotion_data['startDate'][:-1], promotion_data['endDate'][:-1]
                     )
-                    start_date = datetime.fromisoformat(start_date_iso)
-                    end_date = datetime.fromisoformat(end_date_iso)
+                    start_date = datetime.datetime.fromisoformat(start_date_iso)
+                    end_date = datetime.datetime.fromisoformat(end_date_iso)
                     # Is free now
             except TypeError:
                 pass

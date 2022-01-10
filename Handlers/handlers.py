@@ -22,7 +22,7 @@ def start(update: Update, context: CallbackContext):
     logging.log(level=logging.INFO, msg='executed "start" command')
 
 
-def send_games(games_array, context: CallbackContext, target_id: str):
+def send_games(games_array, context, target_id: str):
     for game in games_array:
         context.bot.send_photo(chat_id=target_id, photo=game[1],
                                caption=f"{game[0]}\n"
@@ -37,12 +37,15 @@ def get_free_games(update: Update, context: CallbackContext):
     global main_bot
     free_games = main_bot.get_free_games()
     target_id = update.effective_chat.id
-    send_games(free_games, context, target_id)
+    send_games(free_games, context.bot, target_id)
     logging.log(level=logging.INFO, msg='executed "free" command')
 
 
-def check_for_free_games(bot, job) -> None:
-    context = CallbackContext()
+def test_schedule(bot):
+    bot.bot.send_message(chat_id=120147833, text="test")
+
+
+def check_for_free_games(bot):
     with open("ids.txt", "r") as file:
         ids = file.readlines()
         ids = list(dict.fromkeys(ids))
@@ -68,7 +71,7 @@ def check_for_free_games(bot, job) -> None:
     if len(current_free_games) > 0:
         save_free_games(current_free_games)
         for target_id in ids:
-            send_games(current_free_games, context, target_id.replace('\n', ''))
+            send_games(current_free_games, bot, target_id.replace('\n', ''))
             logging.log(level=logging.INFO, msg='executed "check_free_games" command')
     else:
         logging.log(level=logging.INFO, msg='no new games found')
@@ -149,7 +152,7 @@ def unsubscribe_from_free_games(update: Update, context: CallbackContext):
     logging.log(level=logging.INFO, msg='executed "unsub" command')
 
 
-def unknown(update: Update, context: CallbackContext):
+def unknown_command(update: Update, context: CallbackContext):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Unknown Command :C")
     logging.log(level=logging.INFO, msg='executed "unknown" command')
 
@@ -158,10 +161,9 @@ start_handler = CommandHandler('start', start)
 free_game_handler = CommandHandler('free', get_free_games)
 subscribe_handler = CommandHandler('subscribe', register_for_free_games)
 unsubscribe_handler = CommandHandler('unsub', unsubscribe_from_free_games)
-unknown_handler = MessageHandler(Filters.command, unknown)
-test_handler = CommandHandler('test', check_for_free_games)
+unknown_handler = MessageHandler(Filters.command, unknown_command)
 
 
 def get_handlers():
-    res_list = [start_handler, free_game_handler, subscribe_handler, unsubscribe_handler, test_handler, unknown_handler]
+    res_list = [start_handler, free_game_handler, subscribe_handler, unsubscribe_handler, unknown_handler]
     return res_list
