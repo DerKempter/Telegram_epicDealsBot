@@ -37,7 +37,7 @@ def get_free_games(update: Update, context: CallbackContext):
     global main_bot
     free_games = main_bot.get_free_games()
     target_id = update.effective_chat.id
-    send_games(free_games, context.bot, target_id)
+    send_games(free_games, context, target_id)
     logging.log(level=logging.INFO, msg='executed "free" command')
 
 
