@@ -22,6 +22,10 @@ def start(update: Update, context: CallbackContext):
     logging.log(level=logging.INFO, msg='executed "start" command')
 
 
+def keep_up(bot):
+    logging.log(level=logging.INFO, msg='Performing logging to keep the application awake')
+
+
 def send_games(games_array, context, target_id: str):
     for game in games_array:
         context.bot.send_photo(chat_id=target_id, photo=game[1],

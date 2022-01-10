@@ -48,6 +48,7 @@ class BotLogic:
         timezone = pytz.timezone('CET')
         self.job_queue.run_daily(callback=handlers.check_for_free_games,
                                  time=datetime.time(hour=19, tzinfo=timezone))
+        keep_up = self.job_queue.run_repeating(callback=handlers.keep_up, first=5, interval=1500)
 
     def prep_dispatcher(self):
         token_string = prep_token()
